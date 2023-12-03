@@ -2,6 +2,8 @@
   "src": [
     "pages/Index",
     "pages/newsDetail",
-    "pages/newsShow"
+    "pages/newsShow",
+    "pages/dayday",
+    "pages/qidong"
   ]
 }

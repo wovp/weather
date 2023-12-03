@@ -11,7 +11,6 @@ struct newsDetail{
     }
     build(){
         Column(){
-            Text("Hello World")
             Web({ src: "www.baidu.com", controller: this.webviewController})
         }
 

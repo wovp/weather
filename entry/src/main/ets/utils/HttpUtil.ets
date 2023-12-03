@@ -63,3 +63,4 @@ export async function httpNewsGet(url: string){
 
   return result;
 }
+

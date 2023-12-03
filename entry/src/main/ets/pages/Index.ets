@@ -16,15 +16,32 @@ struct Index {
   @State weekWeather: weatherData[] = [];
   @State nowTem: string = "0";
   @State chooseCity: string = "重庆"
+  @State bigWeatherPic: Resource = $r('app.media.qinglang')
 
 
-
+  pageTransition() {
+    // 定义页面进入时的效果，从右侧滑入，时长为1000ms，页面栈发生push操作时该效果才生效
+    PageTransitionEnter({ type: RouteType.Push, duration: 1000 })
+      .slide(SlideEffect.Right)
+    // 定义页面进入时的效果，从左侧滑入，时长为1000ms，页面栈发生pop操作时该效果才生效
+    PageTransitionEnter({ type: RouteType.Pop, duration: 1000 })
+      .slide(SlideEffect.Left)
+    // 定义页面退出时的效果，向左侧滑出，时长为1000ms，页面栈发生push操作时该效果才生效
+    PageTransitionExit({ type: RouteType.Push, duration: 1000 })
+      .slide(SlideEffect.Left)
+    // 定义页面退出时的效果，向右侧滑出，时长为1000ms，页面栈发生pop操作时该效果才生效
+    PageTransitionExit({ type: RouteType.Pop, duration: 1000 })
+      .slide(SlideEffect.Right)
+  }
 
   async aboutToAppear(){
     let resultWeatherJson = await httpWeatherGet(this.weatherHost + this.weatherPath);
     this.manageWeatherJson(resultWeatherJson["result"]);
     let resultNewsJson = await httpNewsGet(this.newsHost + this.newsPath)
     this.manageNewsJson(resultNewsJson["result"]);
+    if (this.weekWeather[0].day_weather !== '晴') {
+      this.bigWeatherPic = $r('app.media.yintian')
+    }
   }
 
   public manageWeatherJson(resultJson){
@@ -95,39 +112,65 @@ struct Index {
 
   @Builder
   newsShowItem(nn: newsData){
-    Column(){
-      Text(nn.title)
-        .fontSize(16)
-      Text(nn.pubDate)
-        .fontSize(12)
+    Column({space: 10}){
+      Row({space: 5}){
+        Image($r('app.media.xinwen'))
+          .width(30)
+        Text(nn.title)
+          .fontWeight(FontWeight.Medium)
+          .fontSize(22)
+      }
+
+      Row() {
+        Image($r('app.media.newtime'))
+          .width(20)
+        Text(nn.pubDate)
+          .fontSize(16)
+      }
       Button("详情")
         .onClick(() => {
           this.onJumpNewsDetailClick(nn.link)
 
         })
-      Text(nn.source)
-        .fontSize(12)
+      Row(){
+        Image($r('app.media.newtime'))
+          .width(15)
+        Text(nn.source)
+          .fontSize(12)
+
+      }
+
       // Web({ src: nn.link, controller: this.webviewController})
     }
+    .alignItems(HorizontalAlign.Start)
 
   }
 
-  build() {
-    Column({space: 20}) {
+  @Builder
+  showWeatherList(){
+    Column() {
+      Column() {
+        Text('每日天气')
+          .backgroundColor('#1260e5ac')
+      }
+
       Column() {
         Text(this.chooseCity)
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
       }
       .width('100%')
+
       Divider()
-      Column(){
+      Column() {
         if (this.weekWeather.length > 0) {
           this.smallWeather($r("app.media.ziwaixian"), this.weekWeather[0].ziwaixian)
           this.smallWeather($r("app.media.qiya"), this.weekWeather[0].air_press)
           this.bigWeatherTem(this.weekWeather[0].day_air_temperature, this.weekWeather[0].night_air_temperature, this.weekWeather[0].day_weather)
+
         }
       }
+
       Column() {
         List({ space: 20 }) {
           ForEach(this.weekWeather, (item: weatherData) => {
@@ -146,23 +189,49 @@ struct Index {
         .width('100%')
         .listDirection(Axis.Horizontal)
       }
-      .height('23%')
-      .width('100%')
-      Divider()
-      Column() {
-        List({ space: 20 }) {
-          ForEach(this.nowNews, (item: newsData) => {
-            ListItem() {
-              this.newsShowItem(item);
-            }
-          }, item => item.link)
-        }
-        .height('30%')
-        .width('100%')
-      }
+
     }
     .height('100%')
-    .width("100%")
+    .width('100%')
+    .backgroundImage(this.bigWeatherPic)
+    .backgroundImageSize(ImageSize.Cover)
+  }
+
+  @Builder
+  showNewsList(){
+    Column() {
+      Column() {
+        Text('每日新闻')
+          .backgroundColor('#1260e5ac')
+      }
+
+      List({ space: 40 }) {
+        ForEach(this.nowNews, (item: newsData) => {
+          ListItem() {
+            this.newsShowItem(item);
+          }
+        }, item => item.link)
+      }
+      .height('100%')
+      .width('100%')
+    }
+
+  }
+  build() {
+    Column(){
+
+      Tabs({ barPosition: BarPosition.End }){
+        TabContent(){
+          this.showWeatherList()
+        }
+        .tabBar('天气')
+        TabContent(){
+          this.showNewsList()
+        }
+        .tabBar('新闻')
+      }
+    }
+
   }
 
   public onJumpNewsDetailClick(newsLink: string): void {
@@ -180,6 +249,7 @@ struct Index {
     }
     console.info('Invoke pushUrl succeeded.');
   });
+
 }
 
 }

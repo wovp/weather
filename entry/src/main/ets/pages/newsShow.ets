@@ -30,7 +30,6 @@ struct NewsShow {
     }
     build(){
         Column(){
-            Text("Hello World")
             Web({ src: this.lili, controller: this.webviewController})
 
         }

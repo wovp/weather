@@ -21,7 +21,7 @@ import http from '@ohos.net.http';
  * @param url URL for initiating an HTTP request.
  * @returns the result of HTTPS.
  */
-export async function httpWeatherGet(url: string) {
+export function httpWeatherGet(url: string) {
   if (!url) {
     return undefined;
   }
@@ -37,7 +37,7 @@ export async function httpWeatherGet(url: string) {
     expectDataType: http.HttpDataType.OBJECT, // 可选，指定返回数据的类型
   } as http.HttpRequestOptions;
   url = url + "?" + querys;
-  let result = await request.request(url, options);
+  let result = request.request(url, options);
   return result;
 }
 

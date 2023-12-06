@@ -6,6 +6,7 @@
   "author": "",
   "license": "",
   "dependencies": {
+    "meichuangtools": "file:meichuangtools/build/default/outputs/default/meichuangtools.har"
   },
   "devDependencies": {
     "@ohos/hypium": "1.0.6"

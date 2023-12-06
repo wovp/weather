@@ -1,6 +1,7 @@
 import newsData from '../model/newsData'
 import weatherData from '../model/weatherData'
 import { httpNewsGet, httpWeatherGet } from '../utils/HttpUtil'
+import { McLineChart } from 'meichuangtools'
 
 import router from '@ohos.router';
 @Entry
@@ -17,31 +18,28 @@ struct Index {
   @State nowTem: string = "0";
   @State chooseCity: string = "重庆"
   @State bigWeatherPic: Resource = $r('app.media.qinglang')
+  @State xdatas: string[] = ['20231204','20231205','20231206','20231207',"20231208",'20231209','20231210']
+  @State temHigtDatas: string[] = ['16','14','18','18',"18",'18','17']
+  @State temLowDatas: string[] = ['10','10','8','9','11','12','14']
 
 
-  pageTransition() {
-    // 定义页面进入时的效果，从右侧滑入，时长为1000ms，页面栈发生push操作时该效果才生效
-    PageTransitionEnter({ type: RouteType.Push, duration: 1000 })
-      .slide(SlideEffect.Right)
-    // 定义页面进入时的效果，从左侧滑入，时长为1000ms，页面栈发生pop操作时该效果才生效
-    PageTransitionEnter({ type: RouteType.Pop, duration: 1000 })
-      .slide(SlideEffect.Left)
-    // 定义页面退出时的效果，向左侧滑出，时长为1000ms，页面栈发生push操作时该效果才生效
-    PageTransitionExit({ type: RouteType.Push, duration: 1000 })
-      .slide(SlideEffect.Left)
-    // 定义页面退出时的效果，向右侧滑出，时长为1000ms，页面栈发生pop操作时该效果才生效
-    PageTransitionExit({ type: RouteType.Pop, duration: 1000 })
-      .slide(SlideEffect.Right)
-  }
+  aboutToAppear(){
+    httpWeatherGet(this.weatherHost + this.weatherPath).then((mdata) => {
+      let resultWeatherJson = mdata
+      this.manageWeatherJson(resultWeatherJson["result"]);
+      if (this.weekWeather[0].day_weather !== '晴') {
+        this.bigWeatherPic = $r('app.media.yintian')
+      }
+      this.xdatas = [this.weekWeather[0].day,this.weekWeather[1].day,this.weekWeather[2].day,this.weekWeather[3].day,this.weekWeather[4].day,this.weekWeather[5].day,this.weekWeather[6].day]
+      this.temHigtDatas = [this.weekWeather[0].day_air_temperature, this.weekWeather[1].day_air_temperature, this.weekWeather[2].day_air_temperature, this.weekWeather[3].day_air_temperature, this.weekWeather[4].day_air_temperature, this.weekWeather[5].day_air_temperature, this.weekWeather[6].day_air_temperature]
+      this.temLowDatas = [this.weekWeather[0].night_air_temperature, this.weekWeather[1].night_air_temperature, this.weekWeather[2].night_air_temperature, this.weekWeather[3].night_air_temperature, this.weekWeather[4].night_air_temperature, this.weekWeather[5].night_air_temperature, this.weekWeather[6].night_air_temperature]
 
-  async aboutToAppear(){
-    let resultWeatherJson = await httpWeatherGet(this.weatherHost + this.weatherPath);
-    this.manageWeatherJson(resultWeatherJson["result"]);
-    let resultNewsJson = await httpNewsGet(this.newsHost + this.newsPath)
-    this.manageNewsJson(resultNewsJson["result"]);
-    if (this.weekWeather[0].day_weather !== '晴') {
-      this.bigWeatherPic = $r('app.media.yintian')
-    }
+    });
+
+    httpNewsGet(this.newsHost + this.newsPath).then((mdata) => {
+      let resultNewsJson = mdata
+      this.manageNewsJson(resultNewsJson["result"]);
+    })
   }
 
   public manageWeatherJson(resultJson){
@@ -150,51 +148,77 @@ struct Index {
   showWeatherList(){
     Column() {
       Column() {
-        Text('每日天气')
-          .backgroundColor('#1260e5ac')
-      }
+        Column() {
+          Text('每日天气')
+            .backgroundColor('#1260e5ac')
+        }
 
-      Column() {
-        Text(this.chooseCity)
-          .fontSize(30)
-          .fontWeight(FontWeight.Bold)
+        Column() {
+          Text(this.chooseCity)
+            .fontSize(30)
+            .fontWeight(FontWeight.Bold)
+        }
+        .width('100%')
+
+        Divider()
+        Column() {
+          if (this.weekWeather.length > 0) {
+            this.smallWeather($r("app.media.ziwaixian"), this.weekWeather[0].ziwaixian)
+            this.smallWeather($r("app.media.qiya"), this.weekWeather[0].air_press)
+            this.bigWeatherTem(this.weekWeather[0].day_air_temperature, this.weekWeather[0].night_air_temperature, this.weekWeather[0].day_weather)
+
+          }
+        }
+
+        Column() {
+          List({ space: 20 }) {
+            ForEach(this.weekWeather, (item: weatherData) => {
+              ListItem() {
+                Column() {
+                  Text(item.day)
+                  Image(item.day_weather_pic)
+                    .width(30)
+                  Text(item.day_air_temperature + "℃")
+                  Text(item.night_air_temperature + "℃")
+                }
+              }
+            })
+          }
+          .height('30%')
+          .width('100%')
+          .listDirection(Axis.Horizontal)
+        }
+
       }
+      .height('50%')
       .width('100%')
-
+      .backgroundImage(this.bigWeatherPic)
+      .backgroundImageSize(ImageSize.Cover)
       Divider()
       Column() {
-        if (this.weekWeather.length > 0) {
-          this.smallWeather($r("app.media.ziwaixian"), this.weekWeather[0].ziwaixian)
-          this.smallWeather($r("app.media.qiya"), this.weekWeather[0].air_press)
-          this.bigWeatherTem(this.weekWeather[0].day_air_temperature, this.weekWeather[0].night_air_temperature, this.weekWeather[0].day_weather)
-
-        }
-      }
-
-      Column() {
-        List({ space: 20 }) {
-          ForEach(this.weekWeather, (item: weatherData) => {
-            ListItem() {
-              Column() {
-                Text(item.day)
-                Image(item.day_weather_pic)
-                  .width(30)
-                Text(item.day_air_temperature + "℃")
-                Text(item.night_air_temperature + "℃")
+        McLineChart({
+          options: {
+            xAxis: {
+              data: this.xdatas
+            },
+            yAxis: {
+              name: '温度'
+            },
+            series: [
+              {
+                name: '最高气温',
+                data: this.temHigtDatas
+              },
+              {
+                name: '最低气温',
+                data: this.temLowDatas
               }
-            }
-          })
-        }
-        .height('100%')
-        .width('100%')
-        .listDirection(Axis.Horizontal)
-      }
-
+            ]
+          }
+        })
+      }.width('100%')
+      .height('50%')
     }
-    .height('100%')
-    .width('100%')
-    .backgroundImage(this.bigWeatherPic)
-    .backgroundImageSize(ImageSize.Cover)
   }
 
   @Builder
@@ -222,7 +246,12 @@ struct Index {
 
       Tabs({ barPosition: BarPosition.End }){
         TabContent(){
-          this.showWeatherList()
+          Column(){
+            this.showWeatherList()
+
+          }
+
+
         }
         .tabBar('天气')
         TabContent(){

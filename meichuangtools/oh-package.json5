@@ -1,0 +1,9 @@
+{
+  "name": "meichuangtools",
+  "version": "1.0.0",
+  "description": "meichuangtools《莓创工具库》，一套为开发者准备的基于 `ArkTs语言` 开发的HarmonyOs多功能工具库。我们包含了各种类型的基础组件与图表组件。例如：`签名版`、`折线图`、`柱状图`、`饼图`、`雷达图`等等。后续会上更多系列的工具。",
+  "main": "index.ets",
+  "author": "chenyang",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}

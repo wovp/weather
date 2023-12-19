@@ -26,8 +26,8 @@ export function httpWeatherGet(url: string) {
     return undefined;
   }
   let request = http.createHttp();
-  let appcode = 'd05915f2d9bf4f58a8e264679418af74'
-  let querys = "areaCode=500000&needMoreDay=1&needIndex=0&need3HourForcast=0&needAlarm=0&needHourData=needHourData"
+  let appcode = '?'
+  let querys = "?"
   let options = {
     method: http.RequestMethod.GET,
     header: {
@@ -48,8 +48,8 @@ export async function httpNewsGet(url: string){
   let testhost = 'https://news1.market.alicloudapi.com'
   let testpath = '/newsList'
   let request = http.createHttp();
-  let appcode = 'd05915f2d9bf4f58a8e264679418af74'
-  let querys = 'channelId=5572a108b3cdc86cf39001cd&page=1&maxResult=20'
+  let appcode = '?'
+  let querys = '?'
   let options = {
     method: http.RequestMethod.GET,
     header: {
